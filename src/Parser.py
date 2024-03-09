@@ -1,5 +1,4 @@
-from TLogic import TLogic
-from Lukasiewicz import Lukasiewicz
+from src.Logics.TLogic import TLogic
 
 class LanguageParser:
     # This is universal
@@ -20,18 +19,22 @@ class LanguageParser:
         self.logic = TLogic
 
     def parse_formula(self, formula) -> (tuple):
+        print(formula)
         if formula[0] == "(":
                 formula = formula[1:-1]
         subformula_count = 0
         for index, character in enumerate(formula):
+            print(character)
             if character == "(":
                 subformula_count += 1
             elif character == ")":
                 subformula_count -= 1
             elif subformula_count == 0 and character in self.language:
                 if character == "¬":
+                    print(formula)
                     return (formula[index + 1:], None, self.connective_to_function_name[character])
                 else:
+                    print(formula)
                     return (formula[:index], formula[index + 1:], self.connective_to_function_name[character])
 
     def formula_parser(self, formula):
@@ -91,5 +94,4 @@ class LanguageParser:
 
     def evaluate(self, str_function):
         val = eval(str_function)
-        print(val)
         return val
