@@ -1,4 +1,4 @@
-from TLogic import TLogic
+from src.Logics.TLogic import TLogic
 
 class Godel(TLogic):
 
