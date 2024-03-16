@@ -1,10 +1,5 @@
 
 class TLogic:
-
-    def __init__(self, L: set) -> None:
-        self.language = L
-        self.val = []
-
     def IMPLIES(x, y):
         pass
 

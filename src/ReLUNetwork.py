@@ -6,18 +6,66 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-class ReLUNetwork(nn.Module):
+class ReLUNetwork:
+    def __init__(self, weights: list[np.matrix], biases: list[np.ndarray]):
+        self.weights = weights
+        self.biases = biases
+        self.numLayers = len(weights)
+
+
+class ReLUNetworkOperations:
+    @staticmethod
+    def compose_bias(bias_array1: np.ndarray, bias_array2: np.ndarray) -> np.ndarray:
+        return np.concatenate((bias_array1, bias_array2))
+
+    @staticmethod
+    def compose_weights(weight_matrix1: np.matrix, weight_matrix2: np.matrix) -> np.matrix:
+        num_inputs_mat1, num_weights_mat1 = weight_matrix1.shape[1], weight_matrix1.shape[0]
+        num_inputs_mat2, num_weights_mat2 = weight_matrix2.shape[1], weight_matrix2.shape[0]
+
+        B = np.zeros((num_weights_mat1, num_inputs_mat2))
+        C = np.zeros((num_weights_mat2, num_inputs_mat1))
+    
+        return np.asmatrix(np.block([[weight_matrix1, B],
+                                     [C, weight_matrix2]]))
+
+    @staticmethod
+    def compose_vertically(ReLU1: ReLUNetwork, ReLU2: ReLUNetwork) -> ReLUNetwork:
+        ReLU3 = ReLUNetwork(weights=[], biases=[])
+        ReLU3.numLayers = ReLU1.numLayers
+        for i in range(0, ReLU1.numLayers):
+            ReLU3.weights.append(ReLUNetworkOperations.compose_weights(ReLU1.weights[i], ReLU2.weights[i]))
+            ReLU3.biases.append(ReLUNetworkOperations.compose_bias(ReLU1.biases[i], ReLU2.biases[i]))
+        
+        return ReLU3
+
+    @staticmethod
+    def compose_horizontally(ReLU1: ReLUNetwork, ReLU2: ReLUNetwork) -> ReLUNetwork:
+        ReLU3 = ReLUNetwork(weights=[], biases=[])
+        for i in range(0, ReLU1.numLayers):
+            ReLU3.weights.append(ReLU1.weights[i])
+            ReLU3.biases.append(ReLU1.biases[i])
+
+        for i in range(0, ReLU2.numLayers):
+            ReLU3.weights.append(ReLU2.weights[i])
+            ReLU3.biases.append(ReLU2.biases[i])
+
+        ReLU3.numLayers = ReLU1.numLayers + ReLU2.numLayers
+        
+        return ReLU3
+
+
+class ReLUNetworkTorch(nn.Module):
     def __init__(self, weights, biases):
         super().__init__()
         self.layers = nn.ModuleList()
         numLayers = len(weights)
         for i in range(0, numLayers):
             input_size, output_size = np.shape(weights[i])[1], np.shape(weights[i])[0]
-            print(weights[i].shape)
             
             layer = nn.Linear(input_size, output_size)
-            layer.weight.data = torch.from_numpy(weights[i])
-            layer.bias.data = torch.from_numpy(biases[i])
+            layer.weight.data = torch.from_numpy(weights[i]).to(dtype=torch.float32)
+            layer.bias.data = torch.from_numpy(biases[i]).to(dtype=torch.float32)
             self.layers.append(layer)
             
             if i != numLayers - 1:
@@ -27,38 +75,3 @@ class ReLUNetwork(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
-    
-    def compose(self, ReLU2):
-        lastLayer1 = self.layers[-1]
-        firstLayer2 = ReLU2.layers[0]
-        d2 = lastLayer1.out_features
-
-        Id2 =  torch.eye(d2)
-        print(Id2)
-        TL1 =  torch.cat((Id2, -Id2), 0)
-        T1  =  torch.cat((Id2, -Id2), 1)
-
-        wL1 = torch.matmul(TL1, lastLayer1.weight.data)
-        bL1 = torch.matmul(TL1, lastLayer1.bias.data)
-
-        w1 = torch.matmul(firstLayer2.weight.data, T1)
-        b1 = torch.matmul(firstLayer2.bias.data, T1)
-
-        layerL1 = nn.Linear(lastLayer1.in_features, 2*d2)
-        layerL1.weight.data = wL1
-        layerL1.bias.data = bL1
-        
-        self.layers.pop(len(self.layers) - 1)
-        self.layers.append(layerL1)
-        self.layers.append(nn.ReLU())
-
-        layer1 = nn.Linear(2*d2, firstLayer2.out_features)
-        layer1.weight.data = w1
-        layer1.bias.data = b1
-
-        self.layers.append(layer1)
-
-        for i in range(1, len(ReLU2.layers)):
-            self.layers.append(ReLU2.layers[i])
-
-        return self
