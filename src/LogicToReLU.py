@@ -1,53 +1,59 @@
 from src.ReLUNetwork import *
-from src.Parser import LanguageParser
-import re
+from src.TLogics import *
+from copy import deepcopy
 
-class LogicToReLU():
-    connective_to_relu = {
-        "⊙": ReLUNetwork(
-            [np.matrix([1., 1.], dtype=np.float32), np.matrix([1.], dtype=np.float32)],
-            [np.array([-1.], dtype=np.float32), np.array([0.], dtype=np.float32)]
-        ),
-        "¬": ReLUNetwork(
-            [np.matrix([1.], dtype=np.float32), np.matrix([-1.], dtype=np.float32)],
-            [np.array([0.], dtype=np.float32), np.array([1.], dtype=np.float32)]
-        ),
-        "⊕": ReLUNetwork(
-            [np.matrix([-1., -1.], dtype=np.float32), np.matrix([-1.], dtype=np.float32)],
-            [np.array([1.], dtype=np.float32), np.array([1.], dtype=np.float32)]
-        ),
-        "atom":
-            ReLUNetwork(
-            [np.matrix([1.], dtype=np.float32), np.matrix([1.], dtype=np.float32)],
-            [np.array([0.], dtype=np.float32), np.array([0.], dtype=np.float32)]
-        ),
-    }
+connective_to_ReLU = {
+    "⊙": ReLUNetwork(
+        [np.matrix([1., 1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
+        [np.array([-1.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+    ),
+    "¬": ReLUNetwork(
+        [np.matrix([1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
+        [np.array([0.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+    ),
+    "⊕": ReLUNetwork(
+        [np.matrix([-1., -1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
+        [np.array([1.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+    ),
+    "": ReLUNetwork(
+        [np.matrix([1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
+        [np.array([0.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+    ),
+}
 
-    @staticmethod
-    def compose_layers_vertically(connectives_list: list[str]) -> ReLUNetwork:
-        if re.match('[a-zA-Z]\d*', connectives_list[0]):
-            connectives_list[0] = "atom"
-        ReLU = LogicToReLU.connective_to_relu[connectives_list[0]]
-        for i in range(1, len(connectives_list)):
-            if re.match('[a-zA-Z]\d*', connectives_list[i]):
-                connectives_list[i] = "atom"
-            ReLU = ReLUNetworkOperations.compose_vertically(ReLU, LogicToReLU.connective_to_relu[connectives_list[i]])
-        return ReLU
+def ast_to_ReLU(root: Tree.Node, max_depth: int) -> ReLUNetwork:
+    ReLU = ReLUNetwork()
+    ReLU_v = ReLUNetwork()
 
+    expand_queue = [root]
 
-    @staticmethod
-    def formula_to_ReLU(formula: str) -> ReLUNetwork:
-        formula_tree, inputs, depth = LanguageParser.formula_to_tree(formula)
-        ReLU = LogicToReLU.compose_layers_vertically(formula_tree[0])
-        for layer in range(0, depth):
-            ReLU1 = LogicToReLU.compose_layers_vertically(formula_tree[layer + 1])
-            ReLU = ReLUNetworkOperations.compose_horizontally(ReLU1, ReLU)
-        return ReLU, inputs
-    
-    @staticmethod
-    def valuation_to_tensor(val: dict, inputs):
-        val_inputs = []
-        for input in inputs:
-            val_inputs.append(val[input[0]])
+    while expand_queue:
+        node = expand_queue.pop(0)
+        connective = node.data if node.data in TLogic.connectives else ""
         
-        return torch.tensor(val_inputs, dtype=torch.float32)
+        if node.data not in TLogic.connectives and node.depth < max_depth - 1:
+            children = Tree.Node(node.data, node.depth + 1)
+            expand_queue.append(children)
+        else:
+            for children in Tree.get_children(node):
+                if children.data in TLogic.connectives or (children.depth < max_depth and children.data not in TLogic.connectives):
+                    expand_queue.append(children)
+        
+        if ReLU_v.weights:
+            ReLU_v.compose_vertically(connective_to_ReLU[connective])
+        else:
+            ReLU_v = deepcopy(connective_to_ReLU[connective])
+        
+        if not expand_queue or node.depth != expand_queue[0].depth:
+            if ReLU.weights:
+                ReLU.compose_horizontally(ReLU_v)
+            else:
+                ReLU = deepcopy(connective_to_ReLU[connective])
+            ReLU_v = ReLUNetwork()
+
+    return ReLU
+
+def valuation_to_tensor(val: dict, formula: str):
+    return torch.tensor([val[char] for char in formula if char.isalpha()], dtype=torch.float64)
+
+
