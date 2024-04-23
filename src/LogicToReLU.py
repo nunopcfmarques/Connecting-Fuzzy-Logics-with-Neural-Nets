@@ -37,13 +37,13 @@ class LogicToRelu():
                         expand_queue.append(children)
             
             if ReLU_v.weights:
-                ReLU_v.compose_vertically(self.connectives_to_ReLU[connective])
+                ReLU_v.vertically_append_ReLUs(self.connectives_to_ReLU[connective])
             else:
                 ReLU_v = deepcopy(self.connectives_to_ReLU[connective])
             
             if not expand_queue or node.depth != expand_queue[0].depth:
                 if ReLU.weights:
-                    ReLU.compose_horizontally(ReLU_v)
+                    ReLU.horizontally_append_ReLUs(ReLU_v)
                 else:
                     ReLU = deepcopy(self.connectives_to_ReLU[connective])
                 ReLU_v = ReLUNetwork()
@@ -51,7 +51,7 @@ class LogicToRelu():
         return ReLU
     
     @staticmethod
-    def valuation_to_tensor(val: dict, formula: str) -> torch.Tensor:
+    def valuation_to_tensor(val: dict, formula: str) -> torch.tensor:
         return torch.tensor([val[char] for char in formula if char.isalpha()], dtype=torch.float64)
     
     #TODO

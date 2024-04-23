@@ -10,20 +10,20 @@ from src.LogicToReLU import *
 
 connective_to_ReLU = {
     "⊙": ReLUNetwork(
-        [np.matrix([1., 1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
-        [np.array([-1.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+        [torch.tensor([[1., 1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
+        [torch.tensor([-1.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
     ),
     "¬": ReLUNetwork(
-        [np.matrix([1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
-        [np.array([0.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+        [torch.tensor([[1.]], dtype=torch.float64), torch.tensor([[-1.]], dtype=torch.float64)],
+        [torch.tensor([0.], dtype=torch.float64), torch.tensor([1.], dtype=torch.float64)]
     ),
     "⊕": ReLUNetwork(
-        [np.matrix([-1., -1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
-        [np.array([1.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+        [torch.tensor([[-1., -1.]], dtype=torch.float64), torch.tensor([[-1.]], dtype=torch.float64)],
+        [torch.tensor([1.], dtype=torch.float64), torch.tensor([1.], dtype=torch.float64)]
     ),
     "": ReLUNetwork(
-        [np.matrix([1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
-        [np.array([0.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+        [torch.tensor([[1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
+        [torch.tensor([0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
     ),
 }
 
@@ -54,6 +54,6 @@ for i in range(0, 1000):
     formula = TLogic.random_formula(atoms)
     root, max_depth = TLogic.generate_ast(formula)
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
-    ReLUTorch = ReLUNetworkTorch(ReLU.weights, ReLU.biases)
+    ReLU.construct_layers()
 
-    print(ReLUTorch(LogicToRelu.valuation_to_tensor(val, formula)).item() - TLogic.evaluate_formula(root, val))
+    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - TLogic.evaluate_formula(root, val))

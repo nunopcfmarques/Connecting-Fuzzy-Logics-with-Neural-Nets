@@ -1,62 +1,64 @@
-import numpy as np
-import torch.nn as nn
 import torch as torch
+import torch.nn as nn
 
-class ReLUNetwork:
-    def __init__(self, weights: list[np.matrix] = [], biases: list[np.ndarray] = []) -> None:
+class ReLUNetwork(nn.Module):
+    def __init__(self, weights: list[torch.tensor] = [], biases: list[torch.tensor] = []) -> None:
+        super().__init__()
         self.weights = weights
         self.biases = biases
-        self.numLayers = len(weights)
+        self.num_layers = len(weights)
 
-    @staticmethod
-    def vertically_append_biases(bias_array1: np.ndarray, bias_array2: np.ndarray) -> np.ndarray:
-        return np.concatenate((bias_array1, bias_array2))
-
-    @staticmethod
-    def vertically_append_weights(weight_matrix1: np.matrix, weight_matrix2: np.matrix) -> np.matrix:
-        num_inputs_mat1, num_outputs_mat1 = weight_matrix1.shape[1], weight_matrix1.shape[0]
-        num_inputs_mat2, num_outputs_mat2 = weight_matrix2.shape[1], weight_matrix2.shape[0]
-
-        B = np.zeros((num_outputs_mat1, num_inputs_mat2))
-        C = np.zeros((num_outputs_mat2, num_inputs_mat1))
-    
-        return np.asmatrix(np.block([[weight_matrix1, B],
-                                     [C, weight_matrix2]]))
-    
-    def compose_vertically(self, ReLU2):
-        if self.numLayers != ReLU2.numLayers:
-            raise ValueError("Number of layers in the two networks must be the same for vertical composition.")
-        self.weights = [self.vertically_append_weights(w1, w2) for w1, w2 in zip(self.weights, ReLU2.weights)]
-        self.biases = [self.vertically_append_biases(b1, b2) for b1, b2 in zip(self.biases, ReLU2.biases)]
-        
-        return self
-    
-    def compose_horizontally(self, ReLU2):
-        if ReLU2.weights[-1].shape[0] != self.weights[0].shape[1]:
-            raise ValueError("Number of outputs of the second network must match the number of inputs of the first network.")
-        self.weights = ReLU2.weights + self.weights
-        self.biases = ReLU2.biases + self.biases
-        self.numLayers += ReLU2.numLayers
-
-        return self
-    
-class ReLUNetworkTorch(nn.Module):
-    def __init__(self, weights: list[np.matrix] = [], biases: list[np.ndarray] = []):
-        super().__init__()
+    def construct_layers(self) -> None:
         self.layers = nn.ModuleList()
-        numLayers = len(weights)
-        for i in range(0, numLayers):
-            input_size, output_size = np.shape(weights[i])[1], np.shape(weights[i])[0]
-                
+        for i in range(0, self.num_layers):
+            input_size, output_size = self.weights[i].shape[1], self.weights[i].shape[0]
+
             layer = nn.Linear(input_size, output_size)
-            layer.weight.data = torch.from_numpy(weights[i]).to(dtype=torch.float64)
-            layer.bias.data = torch.from_numpy(biases[i]).to(dtype=torch.float64)
+            layer.weight.data = self.weights[i]
+            layer.bias.data = self.biases[i]
             self.layers.append(layer)
-                
-            if i != numLayers - 1:
+
+            if i != self.num_layers - 1:
                 self.layers.append(nn.ReLU())
 
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
         return x
+
+    def set_weights(self, weights: list[torch.tensor]) -> 'ReLUNetwork':
+        self.weights = weights
+        return self
+    
+    def set_biases(self, biases: list[torch.tensor]) -> 'ReLUNetwork':
+        self.biases = biases
+        return self
+    
+    @staticmethod
+    def vertically_append_biases(bias_tensor1: torch.tensor, bias_tensor2: torch.tensor) -> torch.tensor:
+        return torch.cat((bias_tensor1, bias_tensor2), dim=0)
+    
+    @staticmethod
+    def vertically_append_weights(weight_tensor1: torch.tensor, weight_tensor2: torch.tensor) -> torch.tensor:
+        num_inputs_mat1, num_outputs_mat1 = weight_tensor1.shape[1], weight_tensor1.shape[0]
+        num_inputs_mat2, num_outputs_mat2 = weight_tensor2.shape[1], weight_tensor2.shape[0]
+
+        B = torch.zeros((num_outputs_mat1, num_inputs_mat2), dtype=weight_tensor1.dtype)
+        C = torch.zeros((num_outputs_mat2, num_inputs_mat1), dtype=weight_tensor1.dtype)
+    
+        return torch.cat((torch.cat((weight_tensor1, B), dim=1), torch.cat((C, weight_tensor2), dim=1)), dim=0)
+
+    def vertically_append_ReLUs(self, ReLU2: 'ReLUNetwork') -> 'ReLUNetwork':
+        if self.num_layers != ReLU2.num_layers:
+            raise ValueError("Number of layers in the two networks must be the same for vertical composition.")
+        self.weights = [self.vertically_append_weights(w1, w2) for w1, w2 in zip(self.weights, ReLU2.weights)]
+        self.biases = [self.vertically_append_biases(b1, b2) for b1, b2 in zip(self.biases, ReLU2.biases)]
+        
+        return self
+    
+    def horizontally_append_ReLUs(self, ReLU2: 'ReLUNetwork') -> 'ReLUNetwork':
+        self.weights = ReLU2.weights + self.weights
+        self.biases = ReLU2.biases + self.biases
+        self.num_layers += ReLU2.num_layers
+
+        return self
