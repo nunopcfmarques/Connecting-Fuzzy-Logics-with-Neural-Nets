@@ -3,6 +3,12 @@ import random
 from typing import Any
 from src.utils import Tree
 
+'''
+TLogic is a class that holds some place holder truth functions that are meant to be used as methods os a subclass TLogic if it does not explicitly use them. 
+It also contains the methods to constract the abstract syntax tree and to evaluate the formula.
+Additionally it defines the set of connectives and how we can map them to their respective truth functions.
+'''
+
 class TLogic:
     connectives = {"¬", "⊙", "⊕", "⇒"}
 
@@ -40,20 +46,17 @@ class TLogic:
     def DISJ(self, x, y):
         return self.IMPLIES(self.NEG(x), y)
     
-    @staticmethod
-    def random_formula(atoms: list, max_depth=10) -> str:
-        choosable_connectives = ["¬", "⊙", "⊕", "⇒", ""]
-
+    def random_formula(self, atoms: list, choosable_connectives: list, max_depth=10) -> str:
         if max_depth == 0:
             return random.choice(atoms)
 
         connective = random.choice(choosable_connectives)
         if connective == "¬":
-            return "(¬" + TLogic.random_formula(atoms, max_depth - 1) + ")"
+            return "(¬" + self.random_formula(atoms, choosable_connectives, max_depth - 1) + ")"
         elif connective == "":
             return random.choice(atoms)
         else:
-            return "(" + TLogic.random_formula(atoms, max_depth - 1) + connective + TLogic.random_formula(atoms, max_depth - 1) + ")"
+            return "(" + self.random_formula(atoms, choosable_connectives, max_depth - 1) + connective + self.random_formula(atoms, choosable_connectives, max_depth - 1) + ")"
     
 
     @staticmethod
@@ -116,20 +119,18 @@ class TLogic:
         
         return eval
 
-
+# Here the multiplicative connectives collapse! meaning ∧ is ⊙ and ∨ is ⊕
 class Godel(TLogic):
-    @staticmethod
-    def CONJ(x: np.float64, y: np.float64) -> np.float64:
-        pass
+    def IMPLIES(self, x: np.float64, y: np.float64) -> np.float64:
+        return y if x > y else np.float64(1)
+    
+    #v(A∧B) = min(v(A),v(B))
+    def CONJ(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.minimum(x, y)
 
-    @staticmethod
-    def DISJ(x: np.float64, y: np.float64) -> np.float64:
-        pass
-
-    @staticmethod
-    def NEG(x: np.float64) -> np.float64:
-        pass
-
+    #v(A∨B) = max(v(A),v(B))
+    def DISJ(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.maximum(x, y)
 
 class Product(TLogic):
     @staticmethod

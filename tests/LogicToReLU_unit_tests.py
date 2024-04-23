@@ -9,8 +9,9 @@ sys.path.append(parent_dir)
 from src.LogicToReLU import *
 
 Lukasiewicz = Lukasiewicz()
+Godel = Godel()
 
-connective_to_ReLU = {
+Lukasiewicz_connectives_to_ReLU = {
     "⊙": ReLUNetwork(
         [torch.tensor([[1., 1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
         [torch.tensor([-1.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
@@ -33,7 +34,20 @@ connective_to_ReLU = {
     ),
 }
 
-LukasiewiczToReLU = LogicToRelu(connective_to_ReLU, Lukasiewicz)
+Godel_connectives_to_ReLU = {
+    "⊕": ReLUNetwork(
+        [torch.tensor([[1., 0.], [-1., 1.]], dtype=torch.float64), torch.tensor([[1., 1.]], dtype=torch.float64)],
+        [torch.tensor([0., 0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
+    ),
+    "⊙": ReLUNetwork(
+        [torch.tensor([[1., 0.], [1., -1.]], dtype=torch.float64), torch.tensor([[1., -1.]], dtype=torch.float64)],
+        [torch.tensor([0., 0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
+    )
+
+}
+
+LukasiewiczToReLU = LogicToRelu(Lukasiewicz_connectives_to_ReLU, Lukasiewicz)
+GodelToReLU = LogicToRelu(Godel_connectives_to_ReLU, Godel)
 
 # Examples
 formulas = [
@@ -55,11 +69,21 @@ for formula in formulas:
     print()
 
 atoms = ["w", "x", "y", "z"]
-for i in range(0, 1000):
+#Luka
+for i in range(0, 50):
     val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
-    formula = Lukasiewicz.random_formula(atoms)
+    formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒", ""], max_depth=10)
     root, max_depth = Lukasiewicz.generate_ast(formula)
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     ReLU.construct_layers()
 
     print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val))
+#Godel
+for i in range(0, 50):
+    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
+    formula = Godel.random_formula(atoms, ["⊙", "⊕"], max_depth=10)
+    root, max_depth = Godel.generate_ast(formula)
+    ReLU = GodelToReLU.ast_to_ReLU(root, max_depth)
+    ReLU.construct_layers()
+
+    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Godel.evaluate_formula(root, val))
