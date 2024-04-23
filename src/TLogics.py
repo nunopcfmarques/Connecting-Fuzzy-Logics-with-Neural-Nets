@@ -24,17 +24,21 @@ class TLogic:
     def FALSE(self):
         return 0
 
+    # 0 → 0
     def TRUE(self):
         return self.IMPLIES(self.FALSE(), self.FALSE())
 
+    # ¬A = A → ⊥
     def NEG(self, x):
         return self.IMPLIES(x, self.FALSE())
 
+    # A⊙B = ¬(A → ¬B) 
     def CONJ(self, x, y):
-        return self.IMPLIES(self.NEG(x), y)
-
-    def DISJ(self, x, y):
         return self.NEG(self.IMPLIES(x, self.NEG(y)))
+
+    # A⊕B = ¬A → B
+    def DISJ(self, x, y):
+        return self.IMPLIES(self.NEG(x), y)
     
     @staticmethod
     def random_formula(atoms: list, max_depth=10) -> str:
@@ -142,14 +146,18 @@ class Product(TLogic):
 
 
 class Lukasiewicz(TLogic):
+    #v(A → B) = min(1,1−v(A) +v(B))
     def IMPLIES(self, x: np.float64, y: np.float64) -> np.float64:
         return np.minimum(np.float64(1), np.float64(1) - x + y)
 
+    #v(A⊙B) = max(0,v(A) +v(B)−1)
     def CONJ(self, x: np.float64, y: np.float64) -> np.float64:
         return np.maximum(np.float64(0), x + y - np.float64(1))
 
+    #v(A⊕B) = min(1,v(A) +v(B))
     def DISJ(self, x: np.float64, y: np.float64) -> np.float64:
         return np.minimum(np.float64(1), x + y)
-
+    
+    #v(¬A) = 1−v(A)
     def NEG(self, x: np.float64) -> np.float64:
         return np.float64(1) - x
