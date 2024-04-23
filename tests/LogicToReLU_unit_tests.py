@@ -8,6 +8,27 @@ sys.path.append(parent_dir)
 
 from src.LogicToReLU import *
 
+connective_to_ReLU = {
+    "⊙": ReLUNetwork(
+        [np.matrix([1., 1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
+        [np.array([-1.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+    ),
+    "¬": ReLUNetwork(
+        [np.matrix([1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
+        [np.array([0.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+    ),
+    "⊕": ReLUNetwork(
+        [np.matrix([-1., -1.], dtype=np.float64), np.matrix([-1.], dtype=np.float64)],
+        [np.array([1.], dtype=np.float64), np.array([1.], dtype=np.float64)]
+    ),
+    "": ReLUNetwork(
+        [np.matrix([1.], dtype=np.float64), np.matrix([1.], dtype=np.float64)],
+        [np.array([0.], dtype=np.float64), np.array([0.], dtype=np.float64)]
+    ),
+}
+
+LukasiewiczToReLU = LogicToRelu(connective_to_ReLU, Lukasiewicz())
+
 # Examples
 formulas = [
     ("(x⊙y)"),         # x AND y
@@ -21,7 +42,7 @@ formulas = [
 
 for formula in formulas:
     root, max_depth = TLogic.generate_ast(formula)
-    ReLU = ast_to_ReLU(root, max_depth)
+    ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     print("Formula:", formula)
     print("Weights:", ReLU.weights)
     print("Biases:", ReLU.biases)
@@ -32,7 +53,7 @@ for i in range(0, 1000):
     val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
     formula = TLogic.random_formula(atoms)
     root, max_depth = TLogic.generate_ast(formula)
-    ReLU = ast_to_ReLU(root, max_depth)
+    ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     ReLUTorch = ReLUNetworkTorch(ReLU.weights, ReLU.biases)
 
-    print(ReLUTorch(valuation_to_tensor(val, formula)).item() - TLogic.evaluate_formula(root, val))
+    print(ReLUTorch(LogicToRelu.valuation_to_tensor(val, formula)).item() - TLogic.evaluate_formula(root, val))
