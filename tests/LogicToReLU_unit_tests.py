@@ -23,6 +23,10 @@ connective_to_ReLU = {
         [torch.tensor([[-1., -1.]], dtype=torch.float64), torch.tensor([[-1.]], dtype=torch.float64)],
         [torch.tensor([1.], dtype=torch.float64), torch.tensor([1.], dtype=torch.float64)]
     ),
+    "⇒": ReLUNetwork(
+        [torch.tensor([[1., -1.]], dtype=torch.float64), torch.tensor([[-1.]], dtype=torch.float64)],
+        [torch.tensor([0.], dtype=torch.float64), torch.tensor([1.], dtype=torch.float64)]
+    ),
     "": ReLUNetwork(
         [torch.tensor([[1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
         [torch.tensor([0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]

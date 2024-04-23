@@ -38,7 +38,7 @@ class TLogic:
     
     @staticmethod
     def random_formula(atoms: list, max_depth=10) -> str:
-        choosable_connectives = ["¬", "⊙", "⊕", ""]
+        choosable_connectives = ["¬", "⊙", "⊕", "⇒", ""]
 
         if max_depth == 0:
             return random.choice(atoms)
