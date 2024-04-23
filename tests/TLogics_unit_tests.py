@@ -9,6 +9,8 @@ from src.TLogics import *
 
 val = {'A': np.float64(0.7), 'B': np.float64(0.5)}
 
+Lukasiewicz = Lukasiewicz()
+
 result, depth = Lukasiewicz.generate_ast("(A⊙B)")
 print("Level Order Traversal: " + str(Tree.level_order_traversal(result)) + " Expected Result: [(⊙, 0), (A, 1), (B, 1)]")
 print(depth)

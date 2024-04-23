@@ -1,4 +1,8 @@
 from collections import deque
+
+'''
+This is a utility class that is used to build an abstract syntax tree
+'''
 class Node:
     def __init__(self, data: str, depth: int) -> None:
         self.left = None
