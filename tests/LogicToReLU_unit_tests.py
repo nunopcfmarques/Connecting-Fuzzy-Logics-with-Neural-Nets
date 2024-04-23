@@ -8,6 +8,8 @@ sys.path.append(parent_dir)
 
 from src.LogicToReLU import *
 
+Lukasiewicz = Lukasiewicz()
+
 connective_to_ReLU = {
     "⊙": ReLUNetwork(
         [torch.tensor([[1., 1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
@@ -27,7 +29,7 @@ connective_to_ReLU = {
     ),
 }
 
-LukasiewiczToReLU = LogicToRelu(connective_to_ReLU, Lukasiewicz())
+LukasiewiczToReLU = LogicToRelu(connective_to_ReLU, Lukasiewicz)
 
 # Examples
 formulas = [
@@ -41,7 +43,7 @@ formulas = [
 ]
 
 for formula in formulas:
-    root, max_depth = TLogic.generate_ast(formula)
+    root, max_depth = Lukasiewicz.generate_ast(formula)
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     print("Formula:", formula)
     print("Weights:", ReLU.weights)
@@ -51,9 +53,9 @@ for formula in formulas:
 atoms = ["w", "x", "y", "z"]
 for i in range(0, 1000):
     val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
-    formula = TLogic.random_formula(atoms)
-    root, max_depth = TLogic.generate_ast(formula)
+    formula = Lukasiewicz.random_formula(atoms)
+    root, max_depth = Lukasiewicz.generate_ast(formula)
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     ReLU.construct_layers()
 
-    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - TLogic.evaluate_formula(root, val))
+    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val))

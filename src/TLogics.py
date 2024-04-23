@@ -18,29 +18,23 @@ class TLogic:
         "⊥": "FALSE",
     }
 
-    @staticmethod
-    def IMPLIES(x: np.float64, y: np.float64) -> np.float64:
-        return np.minimum(np.float64(1.0), np.float64(1.0) - x + y).astype(np.float64)
+    def IMPLIES(self, x, y):
+        pass
 
-    @staticmethod
-    def FALSE() -> np.float64:
-        return np.float64(0)
+    def FALSE(self):
+        return 0
 
-    @staticmethod
-    def TRUE() -> np.float64:
-        return TLogic.NEG(TLogic.FALSE())
+    def TRUE(self):
+        return self.IMPLIES(self.FALSE(), self.FALSE())
 
-    @staticmethod
-    def NEG(x: np.float64) -> np.float64:
-        return np.subtract(np.float64(1.0), x).astype(np.float64)
+    def NEG(self, x):
+        return self.IMPLIES(x, self.FALSE())
 
-    @staticmethod
-    def CONJ(x: np.float64, y: np.float64) -> np.float64:
-        return np.maximum(np.float64(0), x + y - np.float64(1)).astype(np.float64)
+    def CONJ(self, x, y):
+        return self.IMPLIES(self.NEG(x), y)
 
-    @staticmethod
-    def DISJ(x: np.float64, y: np.float64) -> np.float64:
-        return np.minimum(np.float64(1), x + y).astype(np.float64)
+    def DISJ(self, x, y):
+        return self.NEG(self.IMPLIES(x, self.NEG(y)))
     
     @staticmethod
     def random_formula(atoms: list, max_depth=10) -> str:
@@ -80,44 +74,41 @@ class TLogic:
 
         return formula, None, None
     
-    @classmethod
-    def get_function_name(cls, connective: str) -> Any:
-        return getattr(cls, cls.connectives_to_truth_function[connective])
-    
-    @classmethod
-    def generate_ast(cls, formula: str, depth=0) -> tuple[Tree.Node, int]:
+    def generate_ast(self, formula: str, depth=0) -> tuple[Tree.Node, int]:
         if len(formula) == 1:
             return Tree.Node(formula, depth), depth
 
         else:
-            l_formula, r_formula, connective = cls.subdivide_formula(formula)
+            l_formula, r_formula, connective = self.subdivide_formula(formula)
             root = Tree.Node(connective, depth)
             if connective == "¬":
-                left_node, max_depth = cls.generate_ast(l_formula, depth + 1)
+                left_node, max_depth = self.generate_ast(l_formula, depth + 1)
                 root.left = left_node
             else:
-                left_node, left_max_depth = cls.generate_ast(l_formula, depth + 1)
-                right_node, right_max_depth = cls.generate_ast(r_formula, depth + 1)
+                left_node, left_max_depth = self.generate_ast(l_formula, depth + 1)
+                right_node, right_max_depth = self.generate_ast(r_formula, depth + 1)
                 root.left = left_node
                 root.right = right_node
                 max_depth = max(left_max_depth, right_max_depth)
 
         return root, max_depth
     
-    @classmethod
-    def evaluate_formula(cls, root: Tree.Node, val: dict) -> np.float64:
+    def get_function_name(self, connective: str) -> Any:
+        return getattr(self, self.connectives_to_truth_function[connective])
+    
+    def evaluate_formula(self, root: Tree.Node, val: dict) -> np.float64:
         if root.left == None:
-            if val[root.data] in cls.truth_values_to_truth_function:
-                return getattr(cls, cls.truth_values_to_truth_function[val[root.data]])()
+            if val[root.data] in self.truth_values_to_truth_function:
+                return getattr(self, self.truth_values_to_truth_function[val[root.data]])()
             else:
                 return val[root.data]
         else:
-            function = cls.get_function_name(root.data)
+            function = self.get_function_name(root.data)
 
             if root.data == "¬":
-                eval = function(cls.evaluate_formula(root.left, val))
+                eval = function(self.evaluate_formula(root.left, val))
             else:
-                eval = function(cls.evaluate_formula(root.left, val), cls.evaluate_formula(root.right, val))
+                eval = function(self.evaluate_formula(root.left, val), self.evaluate_formula(root.right, val))
         
         return eval
 
@@ -151,18 +142,14 @@ class Product(TLogic):
 
 
 class Lukasiewicz(TLogic):
-    @staticmethod
-    def IMPLIES(x: np.float64, y: np.float64) -> np.float64:
-        return np.minimum(np.float64(1), np.float64(1) - x + y).astype(np.float64)
+    def IMPLIES(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.minimum(np.float64(1), np.float64(1) - x + y)
 
-    @staticmethod
-    def CONJ(x: np.float64, y: np.float64) -> np.float64:
-        return np.maximum(np.float64(0), x + y - np.float64(1)).astype(np.float64)
+    def CONJ(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.maximum(np.float64(0), x + y - np.float64(1))
 
-    @staticmethod
-    def DISJ(x: np.float64, y: np.float64) -> np.float64:
-        return np.minimum(np.float64(1), x + y).astype(np.float64)
+    def DISJ(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.minimum(np.float64(1), x + y)
 
-    @staticmethod
-    def NEG(x: np.float64) -> np.float64:
-        return np.float64(1) - x.astype(np.float64)
+    def NEG(self, x: np.float64) -> np.float64:
+        return np.float64(1) - x
