@@ -69,7 +69,9 @@ for formula in formulas:
     print()
 
 atoms = ["w", "x", "y", "z"]
-#Luka
+
+print("Starting Lukasiewicz Tests")
+print()
 for i in range(0, 50):
     val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
     formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒", ""], max_depth=10)
@@ -77,8 +79,12 @@ for i in range(0, 50):
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     ReLU.construct_layers()
 
-    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val))
-#Godel
+    assert((ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val)) == 0)
+print("All Good for Lukasiewicz")
+print()
+
+print("Starting Godel Tests")
+print()
 for i in range(0, 50):
     val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
     formula = Godel.random_formula(atoms, ["⊙", "⊕"], max_depth=10)
@@ -86,4 +92,34 @@ for i in range(0, 50):
     ReLU = GodelToReLU.ast_to_ReLU(root, max_depth)
     ReLU.construct_layers()
 
-    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Godel.evaluate_formula(root, val))
+    assert((ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Godel.evaluate_formula(root, val)) == 0)
+print("All Good for Godel")
+print()
+
+print("Comparing calculated depth with actual depth for Lukasiewicz")
+print()
+for i in range(0, 50):
+    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
+    formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒"], random.randint(1, 10))
+    root, max_depth = Lukasiewicz.generate_ast(formula)
+    ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
+    ReLU.construct_layers()
+
+    assert((len(ReLU.weights) - LukasiewiczToReLU.calculate_maximum_depth(formula)) == 0)
+print("All Good for Lukasiewicz")
+print()
+
+
+print("Comparing calculated depth with actual depth  for Godel")
+print()
+for i in range(0, 50):
+    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
+    formula = Godel.random_formula(atoms, ["⊙", "⊕"], random.randint(1, 10))
+    root, max_depth = Godel.generate_ast(formula)
+    ReLU = GodelToReLU.ast_to_ReLU(root, max_depth)
+    ReLU.construct_layers()
+
+    assert((len(ReLU.weights) - GodelToReLU.calculate_maximum_depth(formula)) == 0)
+print("All Good for Godel")
+print()
+

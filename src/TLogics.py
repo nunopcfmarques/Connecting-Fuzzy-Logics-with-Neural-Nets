@@ -46,7 +46,7 @@ class TLogic:
     def DISJ(self, x, y):
         return self.IMPLIES(self.NEG(x), y)
     
-    def random_formula(self, atoms: list, choosable_connectives: list, max_depth=10) -> str:
+    def random_formula(self, atoms: list, choosable_connectives: list, max_depth) -> str:
         if max_depth == 0:
             return random.choice(atoms)
 

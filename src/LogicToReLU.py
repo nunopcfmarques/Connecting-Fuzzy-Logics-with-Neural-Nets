@@ -50,14 +50,25 @@ class LogicToRelu():
 
         return ReLU
     
-    @staticmethod
-    def valuation_to_tensor(val: dict, formula: str) -> torch.tensor:
-        return torch.tensor([val[char] for char in formula if char.isalpha()], dtype=torch.float64)
+    def calculate_maximum_depth(self, formula: str) -> int:
+        if len(formula) == 1:
+            return 0
+        else:
+            lformula, rformula, connective = self.TLogic.subdivide_formula(formula)
+            num_layers = self.connectives_to_ReLU[connective].num_layers
+            if connective == "¬":
+                return num_layers + self.calculate_maximum_depth(lformula)
+            else:
+                return num_layers + np.maximum(self.calculate_maximum_depth(lformula), self.calculate_maximum_depth(rformula))
     
     #TODO
     '''
     def construct_ReLU_for_connective(self, connective: str) -> ReLUNetwork:
         uses the uderlying logic and constructs the ReLU given the relation of the new connective to already built connectives
     '''
+    
+    @staticmethod
+    def valuation_to_tensor(val: dict, formula: str) -> torch.tensor:
+        return torch.tensor([val[char] for char in formula if char.isalpha()], dtype=torch.float64)
 
 
