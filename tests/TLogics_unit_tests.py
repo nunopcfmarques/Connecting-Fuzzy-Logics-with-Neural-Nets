@@ -45,3 +45,26 @@ print(depth)
 
 result = Lukasiewicz.evaluate_formula(result, val)
 print("Example 5: " + str(result) + " Expected Result: 0.5")
+
+# ----------------------------------------------------------- #
+
+tree_no_degs, depth = Lukasiewicz.generate_ast("(A⊙A)")
+tree_with_degs, depth = Lukasiewicz.generate_ast_with_degs("(A⊙A)")
+
+print(Lukasiewicz.evaluate_formula(tree_with_degs, val) - Lukasiewicz.evaluate_formula(tree_no_degs, val))
+
+tree_no_degs, depth = Lukasiewicz.generate_ast("((A⊙A)⊙(A⊙B))")
+tree_with_degs, depth = Lukasiewicz.generate_ast_with_degs("((A⊙B)⊙(A⊙B))")
+
+def print_tree(Node: Tree.Node):
+    if Node == None:
+        return
+    else:
+        print(Node)
+        print(Node.data)
+        print_tree(Node.right)
+        print_tree(Node.left)
+
+print_tree(tree_with_degs)
+
+print(Lukasiewicz.evaluate_formula(tree_with_degs, val) - Lukasiewicz.evaluate_formula(tree_no_degs, val))

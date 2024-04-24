@@ -100,6 +100,27 @@ class TLogic:
 
         return root, max_depth
     
+    def generate_ast_with_degs(self, formula:str, subformula_to_node={}, depth=0) -> tuple[Tree.Node, int]:
+        if formula in subformula_to_node:
+            return subformula_to_node[formula]
+        elif len(formula) == 1:
+            subformula_to_node[formula] = Tree.Node(formula, depth), depth
+            return subformula_to_node[formula]
+        else:
+            l_formula, r_formula, connective = self.subdivide_formula(formula)
+            root = Tree.Node(connective, depth)
+            if connective == "¬":
+                left_node, max_depth = self.generate_ast_with_degs(l_formula, subformula_to_node, depth + 1)
+                root.left = left_node
+            else:
+                left_node, left_max_depth = self.generate_ast_with_degs(l_formula, subformula_to_node, depth + 1)
+                right_node, right_max_depth = self.generate_ast_with_degs(r_formula, subformula_to_node, depth + 1)
+                root.left = left_node
+                root.right = right_node
+                max_depth = max(left_max_depth, right_max_depth)
+            subformula_to_node[formula] = (root, max_depth)
+            return subformula_to_node[formula]
+    
     def get_function_name(self, connective: str) -> Any:
         return getattr(self, self.connectives_to_truth_function[connective])
     
