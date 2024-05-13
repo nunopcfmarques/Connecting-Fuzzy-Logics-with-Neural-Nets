@@ -20,6 +20,7 @@ class LogicToRelu():
         ReLU = ReLUNetwork()
         ReLU_v = ReLUNetwork()
 
+        #Aqui isto está a criar para uma rede de 2 Layers para um átomo o que é um bocado parvo
         expand_queue = [root]
 
         connectives = set(self.connectives_to_ReLU.keys())
