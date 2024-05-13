@@ -24,7 +24,6 @@ class CReLUNetwork(nn.Module):
     def construct_layers(self) -> None:
         self.layers = nn.ModuleList()
         for i in range(0, self.num_layers):
-            print("Hello")
             input_size, output_size = self.weights[i].shape[1], self.weights[i].shape[0]
 
             layer = nn.Linear(input_size, output_size)
@@ -38,7 +37,6 @@ class CReLUNetwork(nn.Module):
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
-            print(x)
         return x
     
 def transformReLUToCReLU(ReLU: ReLUNetwork) -> 'CReLUNetwork':
