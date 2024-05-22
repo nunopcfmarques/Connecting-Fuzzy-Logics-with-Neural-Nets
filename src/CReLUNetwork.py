@@ -91,7 +91,7 @@ def transformReLUToCReLU(ReLU: ReLUNetwork) -> 'CReLUNetwork':
                     updated_ReLU_weight = torch.hstack((updated_ReLU_weight, ReLU.weights[i + 1][:, j].view(-1, 1)))
 
         CReLUNet.weights.append(CReLU_weight)
-        CReLUNet.biases.append(CReLU_bias)  # Corrected the variable name
+        CReLUNet.biases.append(CReLU_bias)
         ReLU.weights[i + 1] = updated_ReLU_weight
     
     CReLUNet.weights.append(ReLU.weights[-1])
