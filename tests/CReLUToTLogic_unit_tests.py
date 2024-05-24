@@ -107,7 +107,7 @@ print(ReLU(input_tensor) - Lukasiewicz.evaluate_formula(ast, tensor_to_valuation
 
 # 2 
 ReLU = ReLUNetwork (
-    [torch.tensor([[2, -0.5],[.5, -0.5]], dtype=torch.float64), torch.tensor([[2, -0.5],[.5, -0.5]], dtype=torch.float64), torch.tensor([[0.2, 0.2]], dtype=torch.float64)],
+    [torch.tensor([[0.5, -0.5],[.5, -0.5]], dtype=torch.float64), torch.tensor([[0.5, -0.5],[.5, -0.5]], dtype=torch.float64), torch.tensor([[0.2, 0.2]], dtype=torch.float64)],
     [torch.tensor([0.0, -1], dtype=torch.float64), torch.tensor([0.0, -1], dtype=torch.float64), torch.tensor([1], dtype=torch.float64)]
 )
 
@@ -118,7 +118,7 @@ CReLU = transformReLUToCReLU(deepcopy(ReLU))
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
 
 # Step 3 compare outputs
-input_tensor = torch.tensor([0.8, 0.2], dtype=torch.float64)
+input_tensor = torch.tensor([0.2, 0.2], dtype=torch.float64)
 
 atoms = []
 ast, depth = Lukasiewicz.generate_ast(formula, atoms)
