@@ -69,7 +69,7 @@ class LogicToRelu():
     '''
     
     @staticmethod
-    def valuation_to_tensor(val: dict, formula: str) -> torch.tensor:
-        return torch.tensor([val[char] for char in formula if char.isalpha()], dtype=torch.float64)
+    def valuation_to_tensor(val: dict, atoms: list[str]) -> torch.tensor:
+        return torch.tensor([val[atom] for atom in atoms], dtype=torch.float64)
 
 

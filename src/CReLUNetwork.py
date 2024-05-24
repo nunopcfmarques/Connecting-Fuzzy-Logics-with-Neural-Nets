@@ -40,7 +40,7 @@ class CReLUNetwork(nn.Module):
         return x
     
 def transformReLUToCReLU(ReLU: ReLUNetwork) -> 'CReLUNetwork':
-    CReLUNet = CReLUNetwork()
+    CReLUNet = CReLUNetwork([], [])
     CReLUNet.num_layers = ReLU.num_layers
     # Last layer doesn't need to be transformed!
     for i in range(ReLU.num_layers - 1):

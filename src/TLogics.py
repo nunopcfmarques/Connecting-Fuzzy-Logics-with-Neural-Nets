@@ -2,6 +2,7 @@ import numpy as np
 import random
 from typing import Any
 from src.utils import Tree
+import re
 
 '''
 TLogic is a class that holds some place holder truth functions that are meant to be used as methods os a subclass TLogic if it does not explicitly use them. 
@@ -10,13 +11,14 @@ Additionally it defines the set of connectives and how we can map them to their 
 '''
 
 class TLogic:
-    connectives = {"¬", "⊙", "⊕", "⇒"}
+    connectives = {"¬", "⊙", "⊕", "⇒", "δ"}
 
     connectives_to_truth_function = {
         "¬": "NEG",
         "⊙": "CONJ",
         "⊕": "DISJ",
         "⇒": "IMPLIES",
+        "δ": "DELTA",
     }
 
     truth_values_to_truth_function = {
@@ -76,24 +78,42 @@ class TLogic:
             elif subformula_count == 0 and character in TLogic.connectives:
                 if character == "¬":
                     return formula[index + 1:], None, character
+                elif character == "δ":
+                    i = re.match(r'\d+', formula[index + 2:]).group(0)
+                    return formula[index + 3 + len(i):], None, f"{character}{i}" # we need to get δ_i and i is the next character
                 else:
                     return formula[:index], formula[index + 1:], character
 
         return formula, None, None
     
-    def generate_ast(self, formula: str, depth=0) -> tuple[Tree.Node, int]:
-        if len(formula) == 1:
+    @staticmethod
+    def is_atom(formula: str) -> bool:
+        return re.match(r'[a-zA-Z]\d*', formula)
+    
+    @staticmethod
+    def is_constant(formula: str) -> bool:
+        return formula == "0" or formula == "1"
+    
+    def generate_ast(self, formula: str, atoms: list[str] = [], depth: int = 0) -> tuple[Tree.Node, int, list[str]]:
+        if self.is_atom(formula):
+            atoms.append(formula)
+            return Tree.Node(formula, depth), depth
+        
+        elif self.is_constant(formula):
             return Tree.Node(formula, depth), depth
 
         else:
             l_formula, r_formula, connective = self.subdivide_formula(formula)
             root = Tree.Node(connective, depth)
-            if connective == "¬":
-                left_node, max_depth = self.generate_ast(l_formula, depth + 1)
+            if connective[0] == "¬":
+                left_node, max_depth = self.generate_ast(l_formula, atoms, depth + 1)
+                root.left = left_node
+            elif connective[0] == "δ":
+                left_node, max_depth = self.generate_ast(l_formula, atoms, depth + 1)
                 root.left = left_node
             else:
-                left_node, left_max_depth = self.generate_ast(l_formula, depth + 1)
-                right_node, right_max_depth = self.generate_ast(r_formula, depth + 1)
+                left_node, left_max_depth = self.generate_ast(l_formula, atoms, depth + 1)
+                right_node, right_max_depth = self.generate_ast(r_formula, atoms, depth + 1)
                 root.left = left_node
                 root.right = right_node
                 max_depth = max(left_max_depth, right_max_depth)
@@ -109,8 +129,11 @@ class TLogic:
         else:
             l_formula, r_formula, connective = self.subdivide_formula(formula)
             root = Tree.Node(connective, depth)
-            if connective == "¬":
+            if connective[0] == "¬":
                 left_node, max_depth = self.generate_ast_with_degs(l_formula, subformula_to_node, depth + 1)
+                root.left = left_node
+            elif connective[0] == "δ":
+                left_node, max_depth = self.generate_ast_with_degs(l_formula, depth + 1)
                 root.left = left_node
             else:
                 left_node, left_max_depth = self.generate_ast_with_degs(l_formula, subformula_to_node, depth + 1)
@@ -122,19 +145,25 @@ class TLogic:
             return subformula_to_node[formula]
     
     def get_function_name(self, connective: str) -> Any:
-        return getattr(self, self.connectives_to_truth_function[connective])
+        return getattr(self, self.connectives_to_truth_function[connective[0]])
     
     def evaluate_formula(self, root: Tree.Node, val: dict) -> np.float64:
         if root.left == None:
-            if val[root.data] in self.truth_values_to_truth_function:
-                return getattr(self, self.truth_values_to_truth_function[val[root.data]])()
-            else:
-                return val[root.data]
+
+            if root.data in val:
+                if val[root.data] in self.truth_values_to_truth_function:
+                    return getattr(self, self.truth_values_to_truth_function[val[root.data]])()
+                else:
+                    return val[root.data]
+            else: # Case that it is "0" or "1"
+                return int(root.data)
         else:
             function = self.get_function_name(root.data)
 
-            if root.data == "¬":
+            if root.data[0] == "¬":
                 eval = function(self.evaluate_formula(root.left, val))
+            elif root.data[0] == "δ":
+                eval = function(root.data[1], self.evaluate_formula(root.left, val))
             else:
                 eval = function(self.evaluate_formula(root.left, val), self.evaluate_formula(root.right, val))
         
@@ -183,3 +212,6 @@ class Lukasiewicz(TLogic):
     #v(¬A) = 1−v(A)
     def NEG(self, x: np.float64) -> np.float64:
         return np.float64(1) - x
+    
+    def DELTA(self, i: int, x: np.float64 = 1.) -> np.float64:
+        return x / np.float64(i)

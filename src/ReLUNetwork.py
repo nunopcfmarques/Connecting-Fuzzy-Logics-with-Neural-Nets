@@ -1,6 +1,15 @@
 import torch as torch
 import torch.nn as nn
 
+#CReLU activation function
+class CReLU(nn.Module):
+    def __init__(self): 
+        super(CReLU, self).__init__() 
+          
+    def forward(self, x):
+        clipped_x = torch.clamp(x, min=0, max=1)
+        return clipped_x
+
 class ReLUNetwork(nn.Module):
     def __init__(self, weights: list[torch.tensor] = [], biases: list[torch.tensor] = []) -> None:
         super().__init__()
