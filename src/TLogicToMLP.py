@@ -84,7 +84,7 @@ def ast_to_ReLU(root: Tree.Node, max_depth: int, connectives_to_ReLU: dict) -> R
         node = expand_queue.pop(0)
         connective = node.data[0] if node.data[0] in connectives else "i"
             
-        if connective == "" and node.depth < max_depth - 1:
+        if connective == "i" and node.depth < max_depth - 1:
             children = Tree.Node(node.data, node.depth + 1)
             expand_queue.append(children)
         else:
