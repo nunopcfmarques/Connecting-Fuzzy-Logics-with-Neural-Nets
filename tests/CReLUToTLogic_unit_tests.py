@@ -25,16 +25,16 @@ ReLU = ReLUNetwork(
 )
 
 # Step 1 transform into CReLU
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 
 # Step 2 generate formula
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
+print(formula)
 
 # Step 3 compare outputs
 input_tensor = torch.tensor([0.7], dtype=torch.float64)
 
-atoms = []
-ast, depth = Lukasiewicz.generate_ast(formula, atoms)
+ast, depth = Lukasiewicz.generate_ast_with_degs(formula)
 ReLU.construct_layers()
 
 print(ReLU(input_tensor) - Lukasiewicz.evaluate_formula(ast, tensor_to_valuation(input_tensor)))
@@ -46,16 +46,16 @@ ReLU = ReLUNetwork (
 )
 
 # Step 1 transform into CReLU
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 
 # Step 2 generate formula
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
+print(formula)
 
 # Step 3 compare outputs
 input_tensor = torch.tensor([0.4], dtype=torch.float64)
 
-atoms = []
-ast, depth = Lukasiewicz.generate_ast(formula, atoms)
+ast, depth = Lukasiewicz.generate_ast_with_degs(formula)
 ReLU.construct_layers()
 
 print(ReLU(input_tensor) - Lukasiewicz.evaluate_formula(ast, tensor_to_valuation(input_tensor)))
@@ -68,15 +68,16 @@ ReLU = ReLUNetwork(
 )
 
 # Step 1 transform into CReLU
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 
 # Step 2 generate formula
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
+print(formula)
+
 # Step 3 compare outputs
 input_tensor = torch.tensor([0.4, 0.2], dtype=torch.float64)
 
-atoms = []
-ast, depth = Lukasiewicz.generate_ast(formula, atoms)
+ast, depth = Lukasiewicz.generate_ast_with_degs(formula)
 ReLU.construct_layers()
 
 print(ReLU(input_tensor) - Lukasiewicz.evaluate_formula(ast, tensor_to_valuation(input_tensor)))
@@ -92,15 +93,16 @@ ReLU = ReLUNetwork (
 )
 
 # Step 1 transform into CReLU
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 
 # Step 2 generate formula
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
+print(formula)
+
 # Step 3 compare outputs
 input_tensor = torch.tensor([0.4, 0.5, 0.7], dtype=torch.float64)
 
-atoms = []
-ast, depth = Lukasiewicz.generate_ast(formula, atoms)
+ast, depth = Lukasiewicz.generate_ast_with_degs(formula)
 ReLU.construct_layers()
 
 print(ReLU(input_tensor) - Lukasiewicz.evaluate_formula(ast, tensor_to_valuation(input_tensor)))
@@ -112,16 +114,16 @@ ReLU = ReLUNetwork (
 )
 
 # Step 1 transform into CReLU
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 
 # Step 2 generate formula
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
+print(formula)
 
 # Step 3 compare outputs
 input_tensor = torch.tensor([0.2, 0.2], dtype=torch.float64)
 
-atoms = []
-ast, depth = Lukasiewicz.generate_ast(formula, atoms)
+ast, depth = Lukasiewicz.generate_ast_with_degs(formula)
 ReLU.construct_layers()
 CReLU.construct_layers()
 

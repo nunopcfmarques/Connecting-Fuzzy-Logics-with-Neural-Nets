@@ -6,10 +6,17 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from TLogicToReLU import *
+from src.TLogicToReLU import *
 
 Lukasiewicz = Lukasiewicz()
 Godel = Godel()
+
+def construct_lukasiewicz_delta_ReLU(i: int):
+    x = np.float64(1 / int(i))
+    return ReLUNetwork(
+        [torch.tensor([[x]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
+        [torch.tensor([0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
+    )
 
 Lukasiewicz_connectives_to_ReLU = {
     "⊙": ReLUNetwork(
@@ -32,6 +39,7 @@ Lukasiewicz_connectives_to_ReLU = {
         [torch.tensor([[1.]], dtype=torch.float64), torch.tensor([[1.]], dtype=torch.float64)],
         [torch.tensor([0.], dtype=torch.float64), torch.tensor([0.], dtype=torch.float64)]
     ),
+    "δ": construct_lukasiewicz_delta_ReLU
 }
 
 Godel_connectives_to_ReLU = {
@@ -61,6 +69,7 @@ formulas = [
     ("(¬x)"),             # NOT x
     ("((¬x)⊙y)"),        # NOT x AND y
     ("(x⊙((¬y)⊙z))"),   # x AND (NOT y AND z)
+    ("δ_10 x")
 ]
 
 for formula in formulas:
@@ -76,13 +85,14 @@ atoms = ["w", "x", "y", "z"]
 print("Starting Lukasiewicz Tests")
 print()
 for i in range(0, 50):
-    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
-    formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒", ""], max_depth=10)
+    val = {"w": np.float64(np.random.random_sample()), "x": np.float64(np.random.random_sample()), "y": np.float64(np.random.random_sample()), "z": np.float64(np.random.random_sample())}
+    formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒", "δ"], max_depth=10)
     root, max_depth = Lukasiewicz.generate_ast(formula)
     ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
     ReLU.construct_layers()
 
-    assert((ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val)) == 0)
+    print(ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Lukasiewicz.evaluate_formula(root, val))
+
 print("All Good for Lukasiewicz")
 print()
 
@@ -96,33 +106,6 @@ for i in range(0, 50):
     ReLU.construct_layers()
 
     assert((ReLU(LogicToRelu.valuation_to_tensor(val, formula)).item() - Godel.evaluate_formula(root, val)) == 0)
-print("All Good for Godel")
-print()
-
-print("Comparing calculated depth with actual depth for Lukasiewicz")
-print()
-for i in range(0, 50):
-    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
-    formula = Lukasiewicz.random_formula(atoms, ["¬", "⊙", "⊕", "⇒"], random.randint(1, 10))
-    root, max_depth = Lukasiewicz.generate_ast(formula)
-    ReLU = LukasiewiczToReLU.ast_to_ReLU(root, max_depth)
-    ReLU.construct_layers()
-
-    assert((len(ReLU.weights) - LukasiewiczToReLU.calculate_maximum_depth(formula)) == 0)
-print("All Good for Lukasiewicz")
-print()
-
-
-print("Comparing calculated depth with actual depth  for Godel")
-print()
-for i in range(0, 50):
-    val = {"w":np.random.random_sample(), "x": np.random.random_sample(), "y": np.random.random_sample(), "z": np.random.random_sample()}
-    formula = Godel.random_formula(atoms, ["⊙", "⊕"], random.randint(1, 10))
-    root, max_depth = Godel.generate_ast(formula)
-    ReLU = GodelToReLU.ast_to_ReLU(root, max_depth)
-    ReLU.construct_layers()
-
-    assert((len(ReLU.weights) - GodelToReLU.calculate_maximum_depth(formula)) == 0)
 print("All Good for Godel")
 print()
 

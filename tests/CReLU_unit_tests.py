@@ -13,7 +13,7 @@ ReLUNetwork = ReLUNetwork(
     [torch.tensor([5, -1, 0], dtype=torch.float64), torch.tensor([1, -1], dtype=torch.float64), torch.tensor([0.0, -1], dtype=torch.float64), torch.tensor([1], dtype=torch.float64)]
 )
 
-CReLUNetwork = transformReLUToCReLU(deepcopy(ReLUNetwork))
+CReLUNetwork = transform_ReLU_to_CReLU(deepcopy(ReLUNetwork))
 
 print(CReLUNetwork.weights)
 print(CReLUNetwork.biases)

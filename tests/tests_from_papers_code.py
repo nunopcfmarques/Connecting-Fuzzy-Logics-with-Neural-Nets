@@ -31,6 +31,8 @@ CReLU.construct_layers()
 # and outputs the following formula
 formula_paper = compose_MV_terms(CReLU, construct_MV_terms_from_paper(CReLU))
 
+print(formula_paper)
+
 ast_paper, depth = Lukasiewicz.generate_ast(formula_paper)
 
 input_tensor = torch.tensor([0.4, 0.5, 0.7], dtype=torch.float64)
@@ -41,7 +43,7 @@ print(CReLU(input_tensor))
 print(Lukasiewicz.evaluate_formula(ast_paper, tensor_to_valuation(input_tensor)))
 
 # My implementation gives:
-CReLU = transformReLUToCReLU(deepcopy(ReLU))
+CReLU = transform_ReLU_to_CReLU(deepcopy(ReLU))
 CReLU.construct_layers()
 
 formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))

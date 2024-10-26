@@ -68,11 +68,3 @@ def print_tree(Node: Tree.Node):
 print_tree(tree_with_degs)
 
 print(Lukasiewicz.evaluate_formula(tree_with_degs, val) - Lukasiewicz.evaluate_formula(tree_no_degs, val))
-
-
-val = {'x1': np.float64(0.7), 'x2': np.float64(0.5), 'x3': np.float64(0.5)}
-
-tree_with_degs1, depth = Lukasiewicz.generate_ast("(((((0⊙(¬((x1⊙x1)⊕(x1⊙x1))))⊕(x1⊙x1))⊙(((¬((x1⊙x1)⊕(x1⊙x1)))⊕0)⊙(¬((x1⊙x1)⊙(x1⊙x1)))))⊕(x1⊕x1))⊙(((((¬((x1⊙x1)⊕(x1⊙x1)))⊕0)⊙(¬((x1⊙x1)⊙(x1⊙x1))))⊕(x1⊙x1))⊙((¬((x1⊙x1)⊙(x1⊙x1)))⊕0)))")
-
-
-print(Lukasiewicz.evaluate_formula(tree_with_degs1, val))

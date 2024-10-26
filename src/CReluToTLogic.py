@@ -141,6 +141,7 @@ def construct_MV_terms(CReLU: CReLUNetwork) -> dict:
             w = CReLU.weights[layer][neuron].numpy() # gives us the row associated with the neuron
             b = CReLU.biases[layer][neuron].item() # gives us the bias associated with the neuron
             lcm = get_lcm(w + [b]) # TODO we can do this without using lists.
+        
             MV_term = sigma_construct_rational(w, b, lcm)
             MV_terms[layer][neuron + 1] = MV_term
     return MV_terms
