@@ -24,7 +24,6 @@ def DELTA(i: ArithRef, x: ArithRef) -> ArithRef:
 
     
 def ParseToZ3(s: Solver, formula: str, atoms = set()) -> str:
-    print(formula)
     if TLogic.is_atom(formula):
         if formula not in atoms:
             atoms.add(formula)
@@ -40,18 +39,12 @@ def ParseToZ3(s: Solver, formula: str, atoms = set()) -> str:
 
     else:
         l_formula, r_formula, connective = TLogic.subdivide_formula(formula)
-        print(formula)
-        print(l_formula)
-        print(r_formula)
-
-        print(connective)
         
         if connective == "¬":
             left_expr = ParseToZ3(s, l_formula, atoms)
             return f"NEG({left_expr})"
                 
         elif connective[0] == "δ":
-            print("hello")
             left_expr = ParseToZ3(s, l_formula, atoms)
             return f"DELTA({connective[1:]}, {left_expr})"
 
@@ -76,11 +69,7 @@ def SolveFormulaSMT(formula: str, target) -> tuple[bool, ModelRef | None]:
 
     parsed_formula = ParseToZ3(s, formula)
 
-    print(parsed_formula)
-
     s.add(eval(parsed_formula) == target)
-
-    print(s.assertions)
 
     if s.check() == sat:
         return True, s.model()
