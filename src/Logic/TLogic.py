@@ -11,7 +11,9 @@ class Lukasiewicz():
             "⇒": self.implies, 
             "δ": self.delta,
             "T": self.true,
-            "⊥": self.false
+            "⊥": self.false,
+            "==": self.equals,
+            "!=": self.unequals
         }
 
         self.connectives = {"¬", "⊙", "⊕", "∧", "V",  "⇒", "δ"}
@@ -48,6 +50,13 @@ class Lukasiewicz():
     
     def false(self) -> np.float64:
         return np.float64(0)
+    
+    def equals(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.float64(x == y)
+    
+    def unequals(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.float64(x != y)
+
 
 class Godel():
     def __init__(self) -> None:

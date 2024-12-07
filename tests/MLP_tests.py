@@ -83,6 +83,8 @@ CReLUNet.construct_layers()
 print(ReLUNet(torch.tensor([0.5, 0.2, 0.3], dtype=torch.float64)))
 print(CReLUNet(torch.tensor([0.5, 0.2, 0.3], dtype=torch.float64)))
 
+torch.manual_seed(42)
+
 random_weights = [torch.randint(-10, 10, shape, dtype=torch.float64) for shape in weight_shapes]
 random_biases = [torch.randint(-5, 8, (shape,), dtype=torch.float64) for shape in bias_shapes]
 
@@ -97,3 +99,15 @@ CReLUNet.construct_layers()
 # Remember to bound inputs otherwise this fails miserably!!!!
 print(ReLUNet(torch.tensor([0.5, 0.2, 0.3], dtype=torch.float64)))
 print(CReLUNet(torch.tensor([0.5, 0.2, 0.3], dtype=torch.float64)))
+
+weights1 = [torch.tensor([[1, 2], [3, 4]], dtype=torch.float32), torch.tensor([[1, 2], [3, 4]], dtype=torch.float32)]
+biases1 = [torch.tensor([1, 1], dtype=torch.float32), torch.tensor([1, 1], dtype=torch.float32)]
+
+ReLU1 = ReLUNetwork(weights1, biases1)
+
+ReLU1.construct_layers()
+
+print(ReLU1(torch.tensor([2, 3], dtype=torch.float32)))
+
+
+

@@ -46,7 +46,11 @@ def divide_formula(formula: str, connectives: set) -> tuple:
                     return formula[index + 1:], None, character
                 elif character == "δ":
                     i = re.match(r'\d+', formula[index + 2:]).group(0)
-                    return formula[index + 3 + len(i):], None, f"{character}{i}" # we need to get δ_i and i is the next character
+                    return formula[index + 3 + len(i):], None, f"{character}{i}" # we need to get δ_i and i is the next 
+                elif character == "!":
+                    return formula[:index], formula[index + 2:], "!="
+                elif character == "=":
+                     return formula[:index], formula[index + 2:], "=="
                 else:
                     return formula[:index], formula[index + 1:], character
         return formula, None, None
@@ -111,7 +115,9 @@ def evaluate_formula(root: Tree.Node, assignment: dict, TLogic) -> np.float64:
     if root.left == None:
         if root.data in assignment:
             return assignment[root.data]
-        else: # Case that it is "T" or "⊥"
+        try:
+            return float(root.data)
+        except:
             return TLogic.characters_to_truth_function[root.data]()
             
     else:
