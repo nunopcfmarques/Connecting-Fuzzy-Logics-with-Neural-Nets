@@ -1,16 +1,7 @@
-# PIC2
+# Connecting Lukasiewicz Logic with Bounded Rectified Linear Unit Networks
 
-## Connecting T-Norm Logics with Neural Networks
+This thesis project aims to extract Lukasiewicz formulas from Rectified Linear Unit Networks (ReLU Networks) bounded in input [0,1]^n and output [0, 1]. This is done in the hopes of extracting meaning from the networks.
 
-This repository contains both code and documents related to the development of the PIC2.
+It contains a solver for this logic, which indicates if the neural network is capable of reaching a certain value.
 
-### Roadmap
-<ul>
-  <li>Develop skeleton for logics [x]</li>
-  <li>Develop function to allow evaluation for syntatically correct formulas [x] </li>
-  <li>From a formula develop a trained ReLU network and perform some tests [x] </li>
-  <li>Allow network composition [x] </li>
-  <li>From a ReLU network develop a formula [x] </li>
-  <li>Output formulas while the network is training to see evolution [] </li>
-  <li>Perform tests using simple networks []</li>
-</ul>
+It also contains a minimizer for this formulas in this logic by minimizing the an approximate finite valued logic formula.
