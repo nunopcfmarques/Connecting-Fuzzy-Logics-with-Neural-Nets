@@ -15,7 +15,11 @@ def is_false(string):
 def sigma_construct_rational(w, b, lcm):
     integer_w = lcm * w
     integer_b = lcm * b
-    term = f'(δ_{lcm} {sigma_construct(integer_w, integer_b)})'
+
+    if (lcm == 1):
+        term = sigma_construct(integer_w, integer_b)
+    else:
+        term = f'(δ_{lcm} {sigma_construct(integer_w, integer_b)})'
     for i in range(1, lcm): # this goes to s - 1 by definition of range in python
         term = f"({term}⊕(δ_{lcm} {sigma_construct(integer_w, integer_b - i)}))"
     return term

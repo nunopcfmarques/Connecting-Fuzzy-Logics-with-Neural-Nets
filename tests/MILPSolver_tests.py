@@ -14,8 +14,8 @@ from copy import deepcopy
 
 # 1
 ReLU = ReLUNetwork (
-    [torch.tensor([[.5, 0.5, 0.5],[.5, -0.5, -0.5]], dtype=torch.float64), torch.tensor([[-1, 1]], dtype=torch.float64)],
-    [torch.tensor([0.0, -1], dtype=torch.float64), torch.tensor([1], dtype=torch.float64)]
+    [torch.tensor([[-4],[-4]], dtype=torch.float64), torch.tensor([[1, -1]], dtype=torch.float64)],
+    [torch.tensor([2, 1], dtype=torch.float64), torch.tensor([0], dtype=torch.float64)]
 )
 
 # Step 1 transform into CReLU
@@ -26,6 +26,6 @@ formula = compose_MV_terms(CReLU, construct_MV_terms(CReLU))
 
 ReLU.construct_layers()
 
-print(ReLU(torch.tensor([0, 0, 0], dtype=torch.float64)))
+print(ReLU(torch.tensor([0], dtype=torch.float64)))
 
 SolveFormulaMILP(formula)

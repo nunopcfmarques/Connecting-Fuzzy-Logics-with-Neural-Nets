@@ -11,7 +11,7 @@ Additionally it defines the set of connectives and how we can map them to their 
 '''
 
 class TLogic:
-    connectives = {"¬", "⊙", "⊕", "⇒", "δ"}
+    connectives = {"¬", "⊙", "⊕", "⇒", "δ", "!=", "=="}
 
     connectives_to_truth_function = {
         "¬": "NEG",
@@ -19,6 +19,8 @@ class TLogic:
         "⊕": "DISJ",
         "⇒": "IMPLIES",
         "δ": "DELTA",
+        "==": "EQUALS",
+        "!=": "UNEQUALS",
     }
     
     def random_formula(self, atoms: list, choosable_connectives: list, max_depth) -> str:
@@ -56,6 +58,10 @@ class TLogic:
                 elif character == "δ":
                     i = re.match(r'\d+', formula[index + 2:]).group(0)
                     return formula[index + 3 + len(i):], None, f"{character}{i}" # we need to get δ_i and i is the next character
+                elif character == "!":
+                    return formula[:index], formula[index + 2:], "!="
+                elif character == "=":
+                     return formula[:index], formula[index + 2:], "=="
                 else:
                     return formula[:index], formula[index + 1:], character
 
@@ -133,8 +139,10 @@ class TLogic:
         if root.left == None:
             if root.data in val:
                 return val[root.data]
-            else: # Case that it is "0" or "1"
-                return int(root.data)
+            try:
+                return float(root.data)
+            except:
+                return TLogic.characters_to_truth_function[root.data]()
             
         else:
             function = self.get_function_name(root.data)
@@ -194,3 +202,9 @@ class Lukasiewicz(TLogic):
     
     def DELTA(self, i: int, x: np.float64 = 1.) -> np.float64:
         return np.float64(x / int(i))
+    
+    def EQUALS(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.float64(x == y)
+
+    def UNEQUALS(self, x: np.float64, y: np.float64) -> np.float64:
+        return np.float64(x != y)
