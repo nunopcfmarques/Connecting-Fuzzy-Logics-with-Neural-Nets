@@ -1,5 +1,6 @@
 import torch as torch
 import torch.nn as nn
+from src.utils.math_utils import get_lcm
 
 #CReLU activation function
 class CReLU(nn.Module):
@@ -16,6 +17,24 @@ class ReLUNetwork(nn.Module):
         self.weights = weights
         self.biases = biases
         self.num_layers = len(weights)
+
+    def get_general_lcm(self) -> int:
+        coefficients = []
+        for weight in self.weights:
+            coefficients += weight.flatten().tolist()
+        for bias in self.biases:
+            coefficients += bias.flatten().tolist()
+
+        return get_lcm(coefficients)
+    
+    def transform_rational_to_int(self, lcm: int) -> None:
+        self.weights = [weight * lcm for weight in self.weights]
+        self.biases = [bias * (lcm ** (index + 1)) for index, bias in enumerate(self.biases)]
+
+        scaling_factor = lcm ** self.num_layers
+        self.weights[-1] = self.weights[-1] / scaling_factor
+        self.biases[-1] = self.biases[-1] / scaling_factor
+        
 
     def construct_layers(self) -> None:
         self.layers = nn.ModuleList()

@@ -7,8 +7,17 @@ class Node:
     def __init__(self, data: str, depth: int) -> None:
         self.left = None
         self.right = None
+        self.parent = None
         self.data = data
         self.depth = depth
+
+    def replace_child(self, old_child, new_child):
+        if self.left == old_child:
+            self.left = new_child
+        elif self.right == old_child:
+            self.right = new_child
+        if new_child:
+            new_child.parent = self
 
 def level_order_traversal(root: Node) -> list[(str, int)]:
     if root is None:

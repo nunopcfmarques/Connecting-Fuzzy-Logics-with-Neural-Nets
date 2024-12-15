@@ -96,12 +96,61 @@ def FromExpressoMVParser(binary_vector_to_value: dict) -> str:
                 
                 clause += "∧".join(input_conditions)
                 
-                clause += f")∧{binary_vector_to_value[output]})"
+                clause += f"∧{binary_vector_to_value[output]})"
                 clauses.append(clause)
 
     final_clause = "V".join(clauses)
+    print(final_clause)
     return final_clause
 
+def minimize_lukasiewicz(formula: str, values: list) -> str:
+    variables = re.findall(r'\b[a-zA-Z]+\d*\b', formula)
+    
+    # Remove duplicates
+    unique_variables = list(set(variables))
+    
+    # Sort by the number part of the variable
+    sorted_variables = sorted(unique_variables, key=lambda v: (re.match(r'[a-zA-Z]+', v).group(0), int(re.search(r'\d+', v).group(0)) if re.search(r'\d+', v) else float('inf')))
+
+    value_to_binary_vector, binary_vector_to_value = BinaryVectorEncoder(values)
+    ToExpressoMVParser(formula, Lukasiewicz(), sorted_variables, values, value_to_binary_vector)
+    normal_formula = FromExpressoMVParser(binary_vector_to_value)
+
+    return normal_formula
 
 
 
+def minimize_delta_formulas(formula: str, values: list) -> str:
+    index = 0
+    while index < len(formula):
+        if formula[index] == "δ":
+            i = re.match(r'\d+', formula[index + 2:]).group(0)
+            if formula[index + 3 + len(i)] == "(":
+                start_index = index + 3 + len(i)
+                stack = 0
+                for j in range(start_index, len(formula)):
+                    if formula[j] == '(':
+                        stack += 1
+                    elif formula[j] == ')':
+                        stack -= 1
+                        if stack == 0:
+                            subformula = formula[start_index:j+1]
+                            print(subformula)
+                            minimized = minimize_lukasiewicz(subformula, values)
+                            print(minimized)
+                            formula = formula[:start_index - 1] + " " + "(" + minimized + ")" + formula[j + 1:]
+                            index = j
+                            break
+        index += 1
+    return formula
+                
+
+expression = "(¬((δ_2 (((x3⊙(¬x2))⊕x1)⊙((¬x2)⊕x3)))⊕(δ_2 (x1⊙(x3⊙(¬x2))))))"
+
+formula = minimize_delta_formulas(expression, [0, 0.5, 1])
+
+print(formula)
+
+TLogic = Lukasiewicz()
+ast, _ = TLogic.generate_ast(formula)
+print(TLogic.evaluate_formula(ast, {"x1":0 , "x2": 0, "x3": 0}))

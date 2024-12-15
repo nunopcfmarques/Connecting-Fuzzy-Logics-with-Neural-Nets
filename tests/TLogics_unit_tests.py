@@ -68,3 +68,4 @@ def print_tree(Node: Tree.Node):
 print_tree(tree_with_degs)
 
 print(Lukasiewicz.evaluate_formula(tree_with_degs, val) - Lukasiewicz.evaluate_formula(tree_no_degs, val))
+
