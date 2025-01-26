@@ -1,5 +1,5 @@
 from z3 import *
-from src.TLogics import *
+from src.Logic.Parser import *
 
 # Apparently we need to define Lukasiewicz connectives to be interpreted by Z3
 
@@ -23,22 +23,22 @@ def DELTA(i: ArithRef, x: ArithRef) -> ArithRef:
     return x / i
 
     
-def ParseToZ3(s: Solver, formula: str, atoms = set()) -> str:
-    if TLogic.is_atom(formula):
+def ParseToZ3(s: Solver, formula: str, Parser, atoms = set()) -> str:
+    if Parser.is_atom(formula):
         if formula not in atoms:
             atoms.add(formula)
             s.add(Real(formula) >= 0)
             s.add(Real(formula) <= 1)
         return f"Real('{formula}')"
         
-    elif TLogic.is_constant(formula):
+    elif Parser.is_constant(formula):
         if formula == "1":
             return "RealVal(1)"
         else:
             return "RealVal(0)" 
 
     else:
-        l_formula, r_formula, connective = TLogic.subdivide_formula(formula)
+        l_formula, r_formula, connective = Parser.subdivide_formula(formula)
         
         if connective == "¬":
             left_expr = ParseToZ3(s, l_formula, atoms)
@@ -67,7 +67,7 @@ def SolveFormulaSMT(formula: str, target) -> tuple[bool, ModelRef | None]:
 
     s = SolverFor("LRA")
 
-    parsed_formula = ParseToZ3(s, formula)
+    parsed_formula = ParseToZ3(s, formula, Parser())
 
     s.add(eval(parsed_formula) == target)
 
@@ -75,4 +75,3 @@ def SolveFormulaSMT(formula: str, target) -> tuple[bool, ModelRef | None]:
         return True, s.model()
     else:
         return False, None
-    
