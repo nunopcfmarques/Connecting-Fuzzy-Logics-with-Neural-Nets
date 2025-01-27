@@ -77,8 +77,7 @@ def construct_MV_terms(CReLU: CReLUNetwork) -> dict:
             MV_terms[layer][neuron + 1] = MV_term
     return MV_terms
 
-def ReLU_to_formula(ReLU: ReLUNetwork) -> str:
-    CReLU = transform_ReLU_to_CReLU(ReLU)
+def CReLU_to_formula(CReLU: ReLUNetwork) -> str:
     MV_terms = construct_MV_terms(CReLU)
     for layer in range(1, CReLU.num_layers):
         for neuron in range(CReLU.weights[layer].shape[0]):

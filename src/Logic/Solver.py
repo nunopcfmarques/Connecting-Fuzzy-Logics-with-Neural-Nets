@@ -41,16 +41,16 @@ def ParseToZ3(s: Solver, formula: str, Parser, atoms = set()) -> str:
         l_formula, r_formula, connective = Parser.subdivide_formula(formula)
         
         if connective == "¬":
-            left_expr = ParseToZ3(s, l_formula, atoms)
+            left_expr = ParseToZ3(s, l_formula, Parser, atoms)
             return f"NEG({left_expr})"
                 
         elif connective[0] == "δ":
-            left_expr = ParseToZ3(s, l_formula, atoms)
+            left_expr = ParseToZ3(s, l_formula, Parser, atoms)
             return f"DELTA({connective[1:]}, {left_expr})"
 
         else:
-            left_expr = ParseToZ3(s, l_formula, atoms)
-            right_expr = ParseToZ3(s, r_formula, atoms)
+            left_expr = ParseToZ3(s, l_formula, Parser, atoms)
+            right_expr = ParseToZ3(s, r_formula, Parser, atoms)
             
             if connective == "⇒":
                 return f"IMPLIES({left_expr}, {right_expr})"
@@ -67,7 +67,7 @@ def SolveFormulaSMT(formula: str, target) -> tuple[bool, ModelRef | None]:
 
     s = SolverFor("LRA")
 
-    parsed_formula = ParseToZ3(s, formula, Parser())
+    parsed_formula = ParseToZ3(s, formula, Parser(Lukasiewicz()))
 
     s.add(eval(parsed_formula) == target)
 

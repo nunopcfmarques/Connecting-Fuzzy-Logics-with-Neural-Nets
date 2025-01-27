@@ -15,7 +15,9 @@ ReLU = ReLUNetwork(
     [torch.tensor([0, -1, -2], dtype=torch.float64),  torch.tensor([0], dtype=torch.float64)]
 )
 
-formula, _ = ReLU_to_formula(ReLU)
+CReLU = transform_ReLU_to_CReLU(ReLU)
+
+formula, _ = CReLU_to_formula(CReLU)
 
 input_tensor = torch.tensor([0.7], dtype=torch.float64)
 
@@ -32,7 +34,9 @@ ReLU = ReLUNetwork (
     [torch.tensor([2, 1], dtype=torch.float64), torch.tensor([0], dtype=torch.float64)]
 )
 
-formula, _ = ReLU_to_formula(ReLU)
+CReLU = transform_ReLU_to_CReLU(ReLU)
+
+formula, _ = CReLU_to_formula(CReLU)
 input_tensor = torch.tensor([0.4], dtype=torch.float64)
 
 ast = Parser.generate_ast_with_degs(formula)[0]
@@ -48,7 +52,9 @@ ReLU = ReLUNetwork (
     [torch.tensor([0.0, -1], dtype=torch.float64), torch.tensor([1], dtype=torch.float64)]
 )
 
-formula, _ = ReLU_to_formula(ReLU)
+CReLU = transform_ReLU_to_CReLU(ReLU)
+
+formula, _ = CReLU_to_formula(CReLU)
 ReLU.construct_layers()
 
 input_tensor = torch.tensor([0.4, 0.5, 0.3], dtype=torch.float64)
